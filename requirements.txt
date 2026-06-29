@@ -1,0 +1,11 @@
+mlflow
+scikit-learn
+pandas
+numpy
+matplotlib
+ipykernel
+nltk
+tfidfvectorizer
+nmf
+xgboost
+python-dotenv
