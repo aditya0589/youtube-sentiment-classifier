@@ -9,3 +9,5 @@ tfidfvectorizer
 nmf
 xgboost
 python-dotenv
+google-api-python-client
+from_root
