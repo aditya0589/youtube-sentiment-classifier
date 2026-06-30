@@ -11,4 +11,4 @@ class ModelPredictor:
 
 if __name__ == "__main__":
     predictor = ModelPredictor()
-    print(predictor.predict("what is his earphone brand the mic is sick shit"))
+    print(predictor.predict("this is the best video i have ever seen , i love it"))

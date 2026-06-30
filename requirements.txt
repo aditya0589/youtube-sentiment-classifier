@@ -5,11 +5,11 @@ numpy
 matplotlib
 ipykernel
 nltk
-tfidfvectorizer
-nmf
 xgboost
+uvicorn
 python-dotenv
 google-api-python-client
 from_root
 langdetect
 dagshub
+fastapi

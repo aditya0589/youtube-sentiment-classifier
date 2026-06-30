@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Comment Sentiment Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --glass-bg: rgba(17, 24, 39, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --positive: #10b981;
+            --neutral: #6b7280;
+            --negative: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b 0%, var(--bg-color) 60%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        header {
+            margin-top: 3.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #a5b4fc, #6366f1, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            padding: 0 1.5rem 4rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Glassmorphism Card Style */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .input-group input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .input-group button {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 0 2rem;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .input-group button:hover {
+            background: var(--primary-hover);
+        }
+
+        .input-group button:active {
+            transform: scale(0.97);
+        }
+
+        /* Loader Animation */
+        .loader-wrapper {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin: 3rem 0;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #fff;
+            border-bottom-color: var(--primary);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Results Layout */
+        .results-section {
+            display: none;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .results-section {
+                grid-template-columns: 1.2fr 1.8fr;
+            }
+        }
+
+        .chart-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 350px;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 260px;
+            height: 260px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            width: 100%;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 0.75rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .stat-card.pos h4 { color: var(--positive); }
+        .stat-card.neu h4 { color: var(--neutral); }
+        .stat-card.neg h4 { color: var(--negative); }
+
+        .stat-card p {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        .comments-box {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .comments-box h3 {
+            margin-bottom: 1.25rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            background: var(--bg-color);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .comment-item {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 4px solid var(--neutral);
+            padding: 1rem;
+            border-radius: 0 10px 10px 0;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            transition: background-color 0.2s;
+        }
+
+        .comment-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .comment-item.positive { border-left-color: var(--positive); }
+        .comment-item.neutral { border-left-color: var(--neutral); }
+        .comment-item.negative { border-left-color: var(--negative); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>YouTube Sentiment Dashboard</h1>
+        <p>Analyze the global sentiment of YouTube comments in real-time</p>
+    </header>
+
+    <div class="container">
+        <!-- Input Card -->
+        <div class="card">
+            <div class="input-group">
+                <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL or Video ID (e.g., https://www.youtube.com/watch?v=...)">
+                <button id="btnAnalyze" onclick="analyzeVideo()">Analyze</button>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div class="loader-wrapper" id="loader">
+            <span class="loader"></span>
+            <p style="color: var(--text-muted);">Fetching and analyzing comments...</p>
+        </div>
+
+        <!-- Results Grid -->
+        <div class="results-section" id="resultsSection">
+            <!-- Left: Chart & Stats -->
+            <div class="card chart-box">
+                <div class="chart-container">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card pos">
+                        <h4>Positive</h4>
+                        <p id="posPct">0%</p>
+                    </div>
+                    <div class="stat-card neu">
+                        <h4>Neutral</h4>
+                        <p id="neuPct">0%</p>
+                    </div>
+                    <div class="stat-card neg">
+                        <h4>Negative</h4>
+                        <p id="negPct">0%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Comments Feed -->
+            <div class="card comments-box">
+                <h3>Analyzed Comments Feed</h3>
+                <div class="comments-list" id="commentsList">
+                    <!-- Dynamic comments here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sentimentChart = null;
+
+        async function analyzeVideo() {
+            const urlInput = document.getElementById("videoUrl").value.trim();
+            if (!urlInput) {
+                alert("Please enter a valid YouTube Video URL or ID.");
+                return;
+            }
+
+            const loader = document.getElementById("loader");
+            const resultsSection = document.getElementById("resultsSection");
+            const btnAnalyze = document.getElementById("btnAnalyze");
+
+            // UI State transitions
+            loader.style.display = "flex";
+            resultsSection.style.display = "none";
+            btnAnalyze.disabled = true;
+
+            try {
+                const response = await fetch("/analyze-video", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: urlInput })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || "Failed to analyze comments.");
+                }
+
+                // Render metrics
+                document.getElementById("posPct").innerText = `${data.summary.positive.percentage}%`;
+                document.getElementById("neuPct").innerText = `${data.summary.neutral.percentage}%`;
+                document.getElementById("negPct").innerText = `${data.summary.negative.percentage}%`;
+
+                // Render Chart
+                updateChart(
+                    data.summary.positive.count,
+                    data.summary.neutral.count,
+                    data.summary.negative.count
+                );
+
+                // Render Comments
+                const commentsList = document.getElementById("commentsList");
+                commentsList.innerHTML = "";
+                data.comments.forEach(comment => {
+                    const item = document.createElement("div");
+                    item.className = `comment-item ${comment.sentiment}`;
+                    item.innerText = comment.text;
+                    commentsList.appendChild(item);
+                });
+
+                resultsSection.style.display = "grid";
+
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                loader.style.display = "none";
+                btnAnalyze.disabled = false;
+            }
+        }
+
+        function updateChart(pos, neu, neg) {
+            const ctx = document.getElementById('sentimentChart').getContext('2d');
+            
+            if (sentimentChart) {
+                sentimentChart.destroy();
+            }
+
+            sentimentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Neutral', 'Negative'],
+                    datasets: [{
+                        data: [pos, neu, neg],
+                        backgroundColor: ['#10b981', '#6b7280', '#ef4444'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    cutout: '75%'
+                }
+            });
+        }
+    </script>
+</body>
+</html>
