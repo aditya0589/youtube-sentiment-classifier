@@ -8,9 +8,11 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List
 from src.components.data_ingestion import DataIngestion
 from src.components.data_cleaning import DataCleaning
 from src.components.model_predictor import ModelPredictor
+from main import run_pipeline
 
 app = FastAPI(title="YouTube Sentiment Analyzer API")
 
@@ -29,6 +31,9 @@ class PredictionRequest(BaseModel):
 
 class VideoAnalysisRequest(BaseModel):
     url: str
+
+class RetrainRequest(BaseModel):
+    channel_ids: List[str] = ["UC-lHJZR3Gqxm24_Vd_AJ5Yw", "UC16niRr50-MSBwiO3YDb3RA"]
 
 def extract_video_id(url: str) -> str:
     """
@@ -123,6 +128,27 @@ async def analyze_video(request: VideoAnalysisRequest):
         
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.post("/retrain")
+async def retrain_model(request: RetrainRequest):
+    """
+    Trigger the model retraining pipeline on fresh comments from a list of YouTube channels.
+    """
+    try:
+        # Run the ingestion + transformation + training pipeline in-memory
+        run_pipeline(channel_ids=request.channel_ids)
+        
+        # Reload the newly saved model/vectorizer in-memory
+        global predictor
+        predictor = ModelPredictor()
+        
+        return JSONResponse(content={
+            "status": "success",
+            "message": "Model retrained and reloaded in-memory successfully!",
+            "channels_processed": request.channel_ids
+        })
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": f"Retraining failed: {str(e)}"})
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_home():
