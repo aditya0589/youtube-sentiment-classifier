@@ -1,7 +1,4 @@
 import sys
-# Filter out global Spark paths to prevent compatibility errors with newer Python versions on startup
-sys.path = [p for p in sys.path if "spark" not in p.lower()]
-
 import os
 import re
 import time
