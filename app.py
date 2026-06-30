@@ -14,7 +14,6 @@ from src.components.database import (
     init_db, save_video_to_cache, get_video_from_cache,
     get_all_cached_videos, log_metric, get_aggregated_metrics
 )
-from main import run_pipeline
 
 app = FastAPI(title="YouTube Sentiment Analyzer API")
 
@@ -185,6 +184,7 @@ async def retrain_model(request: RetrainRequest):
     Trigger the model retraining pipeline on fresh comments from a list of YouTube channels.
     """
     try:
+        from main import run_pipeline
         # Run the ingestion + transformation + training pipeline in-memory
         run_pipeline(channel_ids=request.channel_ids)
         
