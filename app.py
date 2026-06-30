@@ -12,7 +12,7 @@ from src.components.data_cleaning import DataCleaning
 from src.components.model_predictor import ModelPredictor
 from src.components.database import (
     init_db, save_video_to_cache, get_video_from_cache,
-    get_all_cached_videos, log_metric, get_aggregated_metrics, clear_all_data
+    get_all_cached_videos, log_metric, get_aggregated_metrics
 )
 from main import run_pipeline
 
@@ -58,8 +58,6 @@ class VideoAnalysisRequest(BaseModel):
 class RetrainRequest(BaseModel):
     channel_ids: List[str] = ["UC-lHJZR3Gqxm24_Vd_AJ5Yw", "UC16niRr50-MSBwiO3YDb3RA"]
 
-class ClearCacheRequest(BaseModel):
-    password: str
 
 def extract_video_id(url: str) -> str:
     """
@@ -247,16 +245,6 @@ async def get_model_info():
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": f"Failed to retrieve model info: {str(e)}"})
 
-@app.post("/api/clear-cache")
-async def clear_cache(request: ClearCacheRequest):
-    try:
-        expected_password = os.getenv("ADMIN_PASSWORD", "admin")
-        if request.password != expected_password:
-            return JSONResponse(status_code=401, content={"error": "Invalid admin password."})
-        clear_all_data()
-        return JSONResponse(content={"status": "success", "message": "Cache and metrics cleared successfully!"})
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_home():

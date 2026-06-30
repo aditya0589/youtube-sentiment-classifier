@@ -625,10 +625,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Model Info & Admin panel -->
-            <div class="monitor-details-grid">
+                   <!-- Model Info -->
+            <div style="margin-bottom: 2rem;">
                 <div class="card">
                     <h3>Active Model Details</h3>
                     <div class="model-params-table" style="margin-top: 1rem;">
@@ -650,21 +648,7 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 1.5rem;">
-                    <div>
-                        <h3>Admin Controls</h3>
-                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; line-height: 1.45;">
-                            Wipe out metrics logs, reset API quota estimation, and clear cached video sentiment analyses from the local SQLite database.
-                        </p>
-                    </div>
-                    <div>
-                        <button onclick="clearCacheAndMetrics()" class="btn-danger" style="width: 100%;">
-                            Clear Cache & Metric Logs
-                        </button>
-                    </div>
-                </div>
-            </div>
+            </div>       </div>
         </div>
 
     </div>
@@ -976,44 +960,6 @@
             }
         }
 
-        async function clearCacheAndMetrics() {
-            if (!confirm("Are you sure you want to delete all cached analyses and metrics logs? This action is irreversible.")) {
-                return;
-            }
-            
-            const password = prompt("Enter Admin Password:");
-            if (password === null) {
-                return; // User cancelled
-            }
-            if (!password.trim()) {
-                alert("Password cannot be empty.");
-                return;
-            }
-
-            try {
-                const response = await fetch("/api/clear-cache", { 
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ password: password })
-                });
-                
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.error || "Failed to reset database.");
-                }
-
-                alert(data.message);
-                
-                // Reset views
-                document.getElementById("resultsSection").style.display = "none";
-                document.getElementById("videoUrl").value = "";
-                
-                loadHistory();
-                loadMetrics();
-            } catch (err) {
-                alert("Error: " + err.message);
-            }
-        }
     </script>
 </body>
 </html>
