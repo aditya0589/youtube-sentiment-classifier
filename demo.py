@@ -28,6 +28,12 @@ def run_demo():
         return
         
     video_id = extract_video_id(url_input)
+    
+    # Validate extracted video ID (YouTube video IDs are always exactly 11 characters)
+    if not re.match(r'^[a-zA-Z0-9_-]{11}$', video_id):
+        print(f"Error: '{video_id}' is not a valid YouTube Video ID or URL. YouTube video IDs must be exactly 11 characters.")
+        return
+        
     print(f"\n[1/4] Extracted Video ID: {video_id}")
     
     # 2. Ingest comments in real-time

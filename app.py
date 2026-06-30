@@ -90,6 +90,13 @@ async def analyze_video(request: VideoAnalysisRequest):
     try:
         video_id = extract_video_id(request.url)
         
+        # Validate extracted video ID (YouTube video IDs are always exactly 11 characters)
+        if not re.match(r'^[a-zA-Z0-9_-]{11}$', video_id):
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Invalid YouTube URL or Video ID. Please ensure you enter a valid 11-character YouTube video ID or URL."}
+            )
+        
         # 1. Check cache first
         cached = get_video_from_cache(video_id)
         if cached:
