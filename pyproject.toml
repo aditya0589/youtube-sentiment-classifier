@@ -3,12 +3,21 @@ name = "src"
 version = "0.0.1"
 description = "An MLOps project for productionizing models"
 authors = [{name = "Aditya Y", email = "yraditya895@gmail.com"}]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "scikit-learn",
+    "pandas",
+    "numpy",
+    "google-api-python-client",
+    "nltk",
+    "python-dotenv",
+    "from_root",
+    "langdetect"
+]
 
 [tool.setuptools]
 packages = {find = {}}
-
-[tool.setuptools.dynamic]
-dependencies = {file = "requirements.txt"}
 
 [tool.pyright]
 extraPaths = ["."]
