@@ -12,3 +12,4 @@ python-dotenv
 google-api-python-client
 from_root
 langdetect
+dagshub

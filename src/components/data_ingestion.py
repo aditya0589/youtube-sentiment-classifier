@@ -53,20 +53,33 @@ class DataIngestion:
             logging.error(f"Error getting video details for {len(video_ids)} video IDs")
             raise MyException(e, sys)
 
-    def get_comments(self, video_id: str, max_results: int = 100):
+    def get_comments(self, video_id: str, max_results: int = 100, page_limit: int = 3):
         """
-        Get comments for a video from youtube.
+        Get comments for a video from youtube with pagination support.
         """
         try:
-            logging.info(f"Getting comments for video: {video_id}")
-            request = self.youtube.commentThreads().list(
-                part="snippet",
-                videoId=video_id,
-                maxResults=max_results
-            )
-            response = request.execute()
-            logging.info(f"Got {len(response['items'])} comments for video: {video_id}")
-            return response['items']
+            logging.info(f"Getting comments for video: {video_id} with page limit: {page_limit}")
+            comments = []
+            next_page_token = None
+            
+            for page in range(page_limit):
+                request = self.youtube.commentThreads().list(
+                    part="snippet",
+                    videoId=video_id,
+                    maxResults=max_results,
+                    pageToken=next_page_token
+                )
+                response = request.execute()
+                items = response.get('items', [])
+                comments.extend(items)
+                logging.info(f"Page {page + 1}: Got {len(items)} comments")
+                
+                next_page_token = response.get('nextPageToken')
+                if not next_page_token:
+                    break
+            
+            logging.info(f"Got {len(comments)} total comments for video: {video_id}")
+            return comments
         except Exception as e:
             logging.error(f"Error getting comments for video: {video_id}")
             raise MyException(e, sys)
