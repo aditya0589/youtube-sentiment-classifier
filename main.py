@@ -11,7 +11,7 @@ from src.components.data_transformation import DataTransformation
 from src.components.feature_extraction import FeatureExtraction
 from src.components.model_trainer import ModelTrainer
 
-def run_pipeline(channel_id: str = "UC-lHJZR3Gqxm24_Vd_AJ5Yw"):
+def run_pipeline(channel_ids: list = ["UC-lHJZR3Gqxm24_Vd_AJ5Yw", "UC16niRr50-MSBwiO3YDb3RA"]):
     try:
         os.makedirs("data", exist_ok=True)
         
@@ -20,24 +20,34 @@ def run_pipeline(channel_id: str = "UC-lHJZR3Gqxm24_Vd_AJ5Yw"):
         logging.info("--- Phase 1: Data Ingestion ---")
         ingestor = DataIngestion()
         
-        video_ids = ingestor.get_video_ids(channel_id=channel_id)
-        if not video_ids:
-            raise ValueError(f"No videos found for channel {channel_id}")
-            
-        video_details = ingestor.get_video_details(video_ids)
-        ingestor.convert_video_details_to_dataframe(video_details)
-        
-        target_videos = video_ids[:5]
         all_comments = []
-        for vid in target_videos:
-            try:
-                comments = ingestor.get_comments(video_id=vid, max_results=100, page_limit=10)
-                all_comments.extend(comments)
-            except Exception as e:
-                logging.warning(f"Could not retrieve comments for video {vid}: {e}")
+        all_video_details = []
         
+        for channel_id in channel_ids:
+            try:
+                logging.info(f"Processing channel: {channel_id}")
+                video_ids = ingestor.get_video_ids(channel_id=channel_id)
+                if not video_ids:
+                    logging.warning(f"No videos found for channel {channel_id}")
+                    continue
+                    
+                video_details = ingestor.get_video_details(video_ids)
+                all_video_details.extend(video_details)
+                
+                target_videos = video_ids[:5]
+                for vid in target_videos:
+                    try:
+                        comments = ingestor.get_comments(video_id=vid, max_results=100, page_limit=10)
+                        all_comments.extend(comments)
+                    except Exception as e:
+                        logging.warning(f"Could not retrieve comments for video {vid}: {e}")
+            except Exception as e:
+                logging.warning(f"Failed to process channel {channel_id}: {e}")
+                
         if not all_comments:
-            raise ValueError(f"No comments could be retrieved for channel {channel_id}")
+            raise ValueError("No comments could be retrieved from any channel")
+            
+        ingestor.convert_video_details_to_dataframe(all_video_details)
             
         comments_df = ingestor.convert_comments_to_dataframe(all_comments)
         
