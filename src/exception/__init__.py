@@ -1,7 +1,8 @@
 import sys
 import logging
+from typing import Union
 
-def error_message_detail(error: Exception, error_detail: sys) -> str:
+def error_message_detail(error: Union[Exception, str], error_detail: sys) -> str:
     """
     Extracts detailed error information including file name, line number, and the error message.
 
@@ -28,7 +29,7 @@ class MyException(Exception):
     """
     Custom exception class for handling errors in the US visa application.
     """
-    def __init__(self, error_message: str, error_detail: sys):
+    def __init__(self, error_message: Union[Exception, str], error_detail: sys):
         """
         Initializes the USvisaException with a detailed error message.
 
