@@ -21,7 +21,6 @@ class ModelTrainer:
             self.vectorizer_path = os.path.join(self.artifacts_dir, "vectorizer.pkl")
             self.matrix_path = os.path.join(self.artifacts_dir, "confusion_matrix.png")
             
-            # Initialize DagsHub MLflow tracking
             logging.info("Initializing DagsHub MLflow tracking integration")
             dagshub.init(
                 repo_owner='aditya0589', 
@@ -47,31 +46,26 @@ class ModelTrainer:
             X = df['text'].astype(str)
             y = df['label']
             
-            # Split with stratification to keep equal label ratios
             X_train, X_test, y_train, y_test = train_test_split(
                 X, y, test_size=0.2, random_state=42, stratify=y
             )
             
-            # Save split dataframes locally for artifact logging
             train_df = pd.DataFrame({'text': X_train, 'label': y_train})
             test_df = pd.DataFrame({'text': X_test, 'label': y_test})
-            train_csv = os.path.join(self.artifacts_dir, "train.csv")
-            test_csv = os.path.join(self.artifacts_dir, "test.csv")
+            train_csv = os.path.join("data", "train.csv")
+            test_csv = os.path.join("data", "test.csv")
             train_df.to_csv(train_csv, index=False)
             test_df.to_csv(test_csv, index=False)
 
             logging.info("Vectorizing text using TF-IDF")
-            # Using parameters found by grid search
             vectorizer = TfidfVectorizer(max_features=1000, ngram_range=(1, 1), stop_words=None)
             X_train_vec = vectorizer.fit_transform(X_train)
             X_test_vec = vectorizer.transform(X_test)
 
             logging.info("Training best Logistic Regression model")
-            # Using optimal C=1.0 and balanced class weights
             model = LogisticRegression(C=1.0, class_weight='balanced', random_state=42, max_iter=1000)
             model.fit(X_train_vec, y_train)
 
-            # Evaluate model
             y_pred = model.predict(X_test_vec)
             accuracy = accuracy_score(y_test, y_pred)
             precision = precision_score(y_test, y_pred, average='weighted')
@@ -80,38 +74,34 @@ class ModelTrainer:
             
             logging.info(f"Model evaluation metrics: Accuracy={accuracy:.4f}, F1={f1:.4f}")
 
-            # Plot confusion matrix
             logging.info("Generating confusion matrix plot")
             ConfusionMatrixDisplay.from_predictions(y_test, y_pred)
             plt.title("Confusion Matrix - Best Logistic Regression Model")
             plt.savefig(self.matrix_path)
             plt.close()
 
-            # Save the trained vectorizer and model locally
             logging.info("Saving vectorizer and model artifacts locally")
             with open(self.vectorizer_path, 'wb') as f:
                 pickle.dump(vectorizer, f)
             with open(self.model_path, 'wb') as f:
                 pickle.dump(model, f)
 
-            # Log to MLflow
             logging.info("Logging run details to MLflow")
-            mlflow.set_experiment('yt-comment-classifier-experiments')
+            mlflow.set_experiment('yt-comment-classifier-experimenta')
             with mlflow.start_run(run_name="production_logistic_regression"):
-                # Log hyperparameters
                 mlflow.log_param("max_features", 1000)
                 mlflow.log_param("ngram_range", "(1, 1)")
                 mlflow.log_param("stop_words", "None")
                 mlflow.log_param("C", 1.0)
                 mlflow.log_param("class_weight", "balanced")
                 
-                # Log metrics
+   
                 mlflow.log_metric("accuracy", accuracy)
                 mlflow.log_metric("precision", precision)
                 mlflow.log_metric("recall", recall)
                 mlflow.log_metric("f1_score", f1)
                 
-                # Log artifacts
+
                 mlflow.log_artifact(train_csv)
                 mlflow.log_artifact(test_csv)
                 mlflow.log_artifact(self.matrix_path)

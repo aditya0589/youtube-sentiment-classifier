@@ -1,4 +1,7 @@
 import sys
+# Filter out global Spark paths to prevent compatibility errors with newer Python versions
+sys.path = [p for p in sys.path if "spark" not in p.lower()]
+
 import os
 from src.logger import logging
 from src.exception import MyException
@@ -52,7 +55,11 @@ def run_pipeline(channel_id: str = "UC-lHJZR3Gqxm24_Vd_AJ5Yw"):
         extractor = FeatureExtraction()
         extractor.extract_features(input_file='data/labeled_comments.csv')
         
-        logging.info("Pipeline executed successfully! Final features are saved at data/final_features.csv")
+        logging.info("--- Phase 5: Model Training ---")
+        trainer = ModelTrainer()
+        trainer.train_model(data_path='data/final_features.csv')
+        
+        logging.info("Pipeline executed successfully! Model, metrics, and artifacts are saved and logged.")
         print("Pipeline execution completed successfully!")
         
     except Exception as e:
