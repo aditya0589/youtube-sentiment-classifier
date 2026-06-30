@@ -3,7 +3,11 @@ import json
 import os
 from datetime import datetime
 
-DB_PATH = "data/sentiment_cache.db"
+# Use /tmp on Vercel as the project directory is read-only
+if os.getenv("VERCEL") == "1":
+    DB_PATH = "/tmp/sentiment_cache.db"
+else:
+    DB_PATH = "data/sentiment_cache.db"
 
 def init_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)

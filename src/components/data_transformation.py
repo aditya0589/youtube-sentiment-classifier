@@ -9,8 +9,11 @@ from src.exception import MyException
 class DataTransformation:
     def __init__(self):
         try:
-            logging.info("Initializing DataTransformation and downloading NLTK VADER lexicon")
-            nltk.download('vader_lexicon', quiet=True)
+            if os.getenv("VERCEL") == "1":
+                nltk.data.path.append("/tmp/nltk_data")
+                nltk.download('vader_lexicon', download_dir="/tmp/nltk_data", quiet=True)
+            else:
+                nltk.download('vader_lexicon', quiet=True)
             self.sia = SentimentIntensityAnalyzer()
         except Exception as e:
             logging.error("Error during DataTransformation initialization")

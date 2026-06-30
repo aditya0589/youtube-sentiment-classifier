@@ -109,7 +109,11 @@ class DataIngestion:
         try:
             logging.info(f"Converting comments to dataframe")
             df = pd.json_normalize(comments)
-            df.to_csv("data/comments.csv", index=False)
+            try:
+                os.makedirs("data", exist_ok=True)
+                df.to_csv("data/comments.csv", index=False)
+            except Exception as write_err:
+                logging.warning(f"Could not save comments CSV: {write_err}. Continuing in-memory.")
             logging.info(f"Converted {len(df)} comments to dataframe")
             return df
         except Exception as e:
@@ -123,7 +127,11 @@ class DataIngestion:
         try:
             logging.info(f"Converting video details to dataframe")
             df = pd.json_normalize(video_details)
-            df.to_csv("data/video_details.csv", index=False)
+            try:
+                os.makedirs("data", exist_ok=True)
+                df.to_csv("data/video_details.csv", index=False)
+            except Exception as write_err:
+                logging.warning(f"Could not save video details CSV: {write_err}. Continuing in-memory.")
             logging.info(f"Converted {len(df)} video details to dataframe")
             return df
         except Exception as e:

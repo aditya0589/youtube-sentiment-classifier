@@ -3,6 +3,7 @@ from src.exception import MyException
 import pandas as pd
 from langdetect import detect, LangDetectException, DetectorFactory
 import sys
+import os
 
 
 class DataCleaning:
@@ -41,7 +42,11 @@ class DataCleaning:
             
             df = df[df['snippet.topLevelComment.snippet.textOriginal'].apply(is_english)]
             logging.info(f"Cleaned {len(df)} rows from the dataframe")
-            df.to_csv('data/cleaned_comments.csv', index=False)
+            try:
+                os.makedirs("data", exist_ok=True)
+                df.to_csv('data/cleaned_comments.csv', index=False)
+            except Exception as write_err:
+                logging.warning(f"Could not save cleaned comments CSV: {write_err}. Continuing in-memory.")
             return df
         except Exception as e:
             logging.error("Error removing non-english comments")
@@ -55,7 +60,11 @@ class DataCleaning:
             logging.info("Removing symbols from the dataframe")
             df['snippet.topLevelComment.snippet.textOriginal'] = df['snippet.topLevelComment.snippet.textOriginal'].str.replace(r'[^A-Za-z0-9\s]', '', regex=True)
             logging.info(f"Cleaned {len(df)} rows from the dataframe")
-            df.to_csv('data/cleaned_comments.csv', index=False)
+            try:
+                os.makedirs("data", exist_ok=True)
+                df.to_csv('data/cleaned_comments.csv', index=False)
+            except Exception as write_err:
+                logging.warning(f"Could not save cleaned comments CSV: {write_err}. Continuing in-memory.")
             return df
         except Exception as e:
             logging.error("Error removing symbols from the dataframe")
