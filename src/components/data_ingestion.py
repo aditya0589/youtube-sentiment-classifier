@@ -30,6 +30,11 @@ class DataIngestion:
             )
             response = request.execute()
             video_ids = [item['id']['videoId'] for item in response['items']]
+            try:
+                from src.components.database import log_quota
+                log_quota("get_video_ids (Search API)", 100)
+            except Exception as q_err:
+                logging.warning(f"Could not log search quota: {q_err}")
             logging.info(f"Got {len(video_ids)} video IDs from channel: {channel_id}")
             return video_ids
         except Exception as e:
@@ -47,6 +52,11 @@ class DataIngestion:
                 id=",".join(video_ids)
             )
             response = request.execute()
+            try:
+                from src.components.database import log_quota
+                log_quota("get_video_details (Videos API)", 1)
+            except Exception as q_err:
+                logging.warning(f"Could not log videos quota: {q_err}")
             logging.info(f"Got {len(response['items'])} video details")
             return response['items']
         except Exception as e:
@@ -61,8 +71,10 @@ class DataIngestion:
             logging.info(f"Getting comments for video: {video_id} with page limit: {page_limit}")
             comments = []
             next_page_token = None
+            pages_fetched = 0
             
             for page in range(page_limit):
+                pages_fetched += 1
                 request = self.youtube.commentThreads().list(
                     part="snippet",
                     videoId=video_id,
@@ -77,6 +89,12 @@ class DataIngestion:
                 next_page_token = response.get('nextPageToken')
                 if not next_page_token:
                     break
+            
+            try:
+                from src.components.database import log_quota
+                log_quota("get_comments (CommentThreads API)", pages_fetched)
+            except Exception as q_err:
+                logging.warning(f"Could not log comments quota: {q_err}")
             
             logging.info(f"Got {len(comments)} total comments for video: {video_id}")
             return comments

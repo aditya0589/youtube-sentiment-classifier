@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Comment Sentiment Dashboard</title>
+    <meta name="description" content="YouTube Comment Sentiment Classifier - A production-grade MLOps showcase for real-time sentiment analysis on YouTube comment threads.">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,7 +44,7 @@
 
         header {
             margin-top: 3.5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             text-align: center;
         }
 
@@ -63,13 +64,64 @@
             font-weight: 300;
         }
 
+        /* Tab bar styles */
+        .tab-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.4rem;
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            z-index: 10;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            border-radius: 10px;
+            padding: 0.6rem 1.5rem;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
         .container {
             width: 100%;
-            max-width: 1100px;
+            max-width: 1200px;
             padding: 0 1.5rem 4rem 1.5rem;
             display: flex;
             flex-direction: column;
             gap: 2rem;
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Glassmorphism Card Style */
@@ -83,6 +135,82 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
+        /* Analyzer Layout */
+        .analyzer-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 992px) {
+            .analyzer-layout {
+                grid-template-columns: 280px 1fr;
+            }
+        }
+
+        .analyzer-main {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Sidebar list */
+        .history-sidebar {
+            max-height: 700px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .history-sidebar h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 0.75rem;
+        }
+
+        .history-list {
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding-right: 0.25rem;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .history-item-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.25rem;
+        }
+
+        .history-item-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Input Elements */
         .input-group {
             display: flex;
             gap: 1rem;
@@ -219,6 +347,7 @@
             background: var(--bg-color);
             padding-bottom: 0.5rem;
             border-bottom: 1px solid var(--glass-border);
+            z-index: 5;
         }
 
         .comments-list {
@@ -245,6 +374,105 @@
         .comment-item.neutral { border-left-color: var(--neutral); }
         .comment-item.negative { border-left-color: var(--negative); }
 
+        /* System Monitor Layout */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .metric-info h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-info p {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .metric-icon {
+            font-size: 1.8rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .metric-icon.blue { color: #60a5fa; background: rgba(96, 165, 250, 0.1); }
+        .metric-icon.red { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+        .metric-icon.yellow { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+        .metric-icon.green { color: #34d399; background: rgba(52, 211, 153, 0.1); }
+
+        .monitor-details-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .monitor-details-grid {
+                grid-template-columns: 1.2fr 1fr;
+            }
+        }
+
+        .model-params-table {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .param-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.95rem;
+        }
+
+        .param-name {
+            color: var(--text-muted);
+        }
+
+        .param-value {
+            font-weight: 600;
+        }
+
+        .btn-danger {
+            background: var(--negative);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem 1.5rem;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+
+        .btn-danger:active {
+            transform: scale(0.98);
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -269,56 +497,265 @@
         <p>Analyze the global sentiment of YouTube comments in real-time</p>
     </header>
 
+    <div class="tab-container">
+        <button class="tab-btn active" id="tabAnalyzer" onclick="switchTab('analyzer')">Sentiment Analyzer</button>
+        <button class="tab-btn" id="tabMonitor" onclick="switchTab('monitor')">System Monitor</button>
+    </div>
+
     <div class="container">
-        <!-- Input Card -->
-        <div class="card">
-            <div class="input-group">
-                <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL or Video ID (e.g., https://www.youtube.com/watch?v=...)">
-                <button id="btnAnalyze" onclick="analyzeVideo()">Analyze</button>
+        
+        <!-- Tab 1: Analyzer View -->
+        <div id="analyzerView" class="tab-content active">
+            <div class="analyzer-layout">
+                
+                <!-- Left: Recent Analyses Sidebar -->
+                <div class="card history-sidebar">
+                    <h3>Recent Analyses</h3>
+                    <div id="historyList" class="history-list">
+                        <!-- History loaded via JS -->
+                    </div>
+                </div>
+
+                <!-- Right: Workspace -->
+                <div class="analyzer-main">
+                    <!-- Input Card -->
+                    <div class="card">
+                        <div class="input-group">
+                            <input type="text" id="videoUrl" placeholder="Paste YouTube Video URL or Video ID (e.g., https://www.youtube.com/watch?v=...)">
+                            <button id="btnAnalyze" onclick="analyzeVideo()">Analyze</button>
+                        </div>
+                    </div>
+
+                    <!-- Loader -->
+                    <div class="loader-wrapper" id="loader">
+                        <span class="loader"></span>
+                        <p style="color: var(--text-muted);">Fetching and analyzing comments...</p>
+                    </div>
+
+                    <!-- Results Grid -->
+                    <div class="results-section" id="resultsSection">
+                        <!-- Chart & Stats -->
+                        <div class="card chart-box">
+                            <div class="chart-container">
+                                <canvas id="sentimentChart"></canvas>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-card pos">
+                                    <h4>Positive</h4>
+                                    <p id="posPct">0%</p>
+                                </div>
+                                <div class="stat-card neu">
+                                    <h4>Neutral</h4>
+                                    <p id="neuPct">0%</p>
+                                </div>
+                                <div class="stat-card neg">
+                                    <h4>Negative</h4>
+                                    <p id="negPct">0%</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comments Feed -->
+                        <div class="card comments-box">
+                            <h3 id="feedTitle">Analyzed Comments Feed</h3>
+                            <div class="comments-list" id="commentsList">
+                                <!-- Dynamic comments here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Loader -->
-        <div class="loader-wrapper" id="loader">
-            <span class="loader"></span>
-            <p style="color: var(--text-muted);">Fetching and analyzing comments...</p>
-        </div>
-
-        <!-- Results Grid -->
-        <div class="results-section" id="resultsSection">
-            <!-- Left: Chart & Stats -->
-            <div class="card chart-box">
-                <div class="chart-container">
-                    <canvas id="sentimentChart"></canvas>
+        <!-- Tab 2: System Monitor View -->
+        <div id="monitorView" class="tab-content">
+            <!-- Stats Counters -->
+            <div class="metrics-grid">
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <h4>Total Requests</h4>
+                        <p id="metricTotalReq">0</p>
+                    </div>
+                    <div class="metric-icon blue">⚡</div>
                 </div>
-                <div class="stats-grid">
-                    <div class="stat-card pos">
-                        <h4>Positive</h4>
-                        <p id="posPct">0%</p>
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <h4>Est. YT Quota Used</h4>
+                        <p id="metricQuota">0 / 10,000</p>
                     </div>
-                    <div class="stat-card neu">
-                        <h4>Neutral</h4>
-                        <p id="neuPct">0%</p>
+                    <div class="metric-icon red">🔑</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <h4>Avg Latency</h4>
+                        <p id="metricAvgLatency">0.00s</p>
                     </div>
-                    <div class="stat-card neg">
-                        <h4>Negative</h4>
-                        <p id="negPct">0%</p>
+                    <div class="metric-icon yellow">⏱️</div>
+                </div>
+                <div class="card metric-card">
+                    <div class="metric-info">
+                        <h4>API Success Rate</h4>
+                        <p id="metricSuccessRate">100%</p>
+                    </div>
+                    <div class="metric-icon green">✔️</div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="monitor-details-grid">
+                <!-- Latency Chart -->
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">API Endpoint Latency</h3>
+                    <div style="position: relative; height: 260px;">
+                        <canvas id="endpointLatencyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Global Sentiment Distribution Chart -->
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">System-wide Sentiment Mix</h3>
+                    <div style="display: flex; align-items: center; justify-content: center; min-height: 230px;">
+                        <div style="width: 180px; height: 180px; position: relative;">
+                            <canvas id="globalSentimentChart"></canvas>
+                        </div>
+                        <div style="margin-left: 2rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                            <div><span style="display:inline-block; width:12px; height:12px; background:#10b981; border-radius:50%; margin-right:6px;"></span>Positive: <strong id="globalPosCount">0</strong></div>
+                            <div><span style="display:inline-block; width:12px; height:12px; background:#6b7280; border-radius:50%; margin-right:6px;"></span>Neutral: <strong id="globalNeuCount">0</strong></div>
+                            <div><span style="display:inline-block; width:12px; height:12px; background:#ef4444; border-radius:50%; margin-right:6px;"></span>Negative: <strong id="globalNegCount">0</strong></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Comments Feed -->
-            <div class="card comments-box">
-                <h3>Analyzed Comments Feed</h3>
-                <div class="comments-list" id="commentsList">
-                    <!-- Dynamic comments here -->
+            <!-- Model Info & Admin panel -->
+            <div class="monitor-details-grid">
+                <div class="card">
+                    <h3>Active Model Details</h3>
+                    <div class="model-params-table" style="margin-top: 1rem;">
+                        <div class="param-row">
+                            <span class="param-name">Classifier Model</span>
+                            <span class="param-value" id="modelName">Loading...</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">TF-IDF Vocabulary Size</span>
+                            <span class="param-value" id="modelVocab">Loading...</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Regularization Strength (C)</span>
+                            <span class="param-value" id="modelC">Loading...</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-name">Class Weighting Mode</span>
+                            <span class="param-value" id="modelWeights">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 1.5rem;">
+                    <div>
+                        <h3>Admin Controls</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; line-height: 1.45;">
+                            Wipe out metrics logs, reset API quota estimation, and clear cached video sentiment analyses from the local SQLite database.
+                        </p>
+                    </div>
+                    <div>
+                        <button onclick="clearCacheAndMetrics()" class="btn-danger" style="width: 100%;">
+                            Clear Cache & Metric Logs
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 
     <script>
         let sentimentChart = null;
+        let globalSentimentChart = null;
+        let endpointLatencyChart = null;
+
+        // Load recent history when the page loads
+        window.addEventListener("DOMContentLoaded", () => {
+            loadHistory();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tabId === 'analyzer') {
+                document.getElementById('tabAnalyzer').classList.add('active');
+                document.getElementById('analyzerView').classList.add('active');
+                loadHistory();
+            } else if (tabId === 'monitor') {
+                document.getElementById('tabMonitor').classList.add('active');
+                document.getElementById('monitorView').classList.add('active');
+                loadMetrics();
+                loadModelInfo();
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch("/api/history");
+                const data = await response.json();
+                const historyList = document.getElementById("historyList");
+                historyList.innerHTML = "";
+                
+                if (!data.history || data.history.length === 0) {
+                    historyList.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:0.9rem; padding:2rem 1rem;">No recent analyses.</div>`;
+                    return;
+                }
+                
+                data.history.forEach(item => {
+                    const div = document.createElement("div");
+                    div.className = "history-item";
+                    div.onclick = () => loadCachedVideo(item.video_id);
+                    
+                    const timeStr = new Date(item.analyzed_at).toLocaleDateString(undefined, {
+                        month: 'short', 
+                        day: 'numeric', 
+                        hour: '2-digit', 
+                        minute:'2-digit'
+                    });
+                    
+                    div.innerHTML = `
+                        <div class="history-item-title" title="${item.video_title}">${item.video_title}</div>
+                        <div class="history-item-meta">
+                            <span>ID: ${item.video_id}</span>
+                            <span>${timeStr}</span>
+                        </div>
+                    `;
+                    historyList.appendChild(div);
+                });
+            } catch (err) {
+                console.error("Failed to load history:", err);
+            }
+        }
+
+        async function loadCachedVideo(videoId) {
+            const loader = document.getElementById("loader");
+            const resultsSection = document.getElementById("resultsSection");
+            const btnAnalyze = document.getElementById("btnAnalyze");
+            
+            document.getElementById("videoUrl").value = videoId;
+            loader.style.display = "flex";
+            resultsSection.style.display = "none";
+            btnAnalyze.disabled = true;
+
+            try {
+                const response = await fetch(`/api/history/${videoId}`);
+                if (!response.ok) throw new Error("Failed to fetch cached details.");
+                const data = await response.json();
+
+                renderAnalysisResults(data);
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                loader.style.display = "none";
+                btnAnalyze.disabled = false;
+            }
+        }
 
         async function analyzeVideo() {
             const urlInput = document.getElementById("videoUrl").value.trim();
@@ -331,7 +768,6 @@
             const resultsSection = document.getElementById("resultsSection");
             const btnAnalyze = document.getElementById("btnAnalyze");
 
-            // UI State transitions
             loader.style.display = "flex";
             resultsSection.style.display = "none";
             btnAnalyze.disabled = true;
@@ -349,29 +785,8 @@
                     throw new Error(data.error || "Failed to analyze comments.");
                 }
 
-                // Render metrics
-                document.getElementById("posPct").innerText = `${data.summary.positive.percentage}%`;
-                document.getElementById("neuPct").innerText = `${data.summary.neutral.percentage}%`;
-                document.getElementById("negPct").innerText = `${data.summary.negative.percentage}%`;
-
-                // Render Chart
-                updateChart(
-                    data.summary.positive.count,
-                    data.summary.neutral.count,
-                    data.summary.negative.count
-                );
-
-                // Render Comments
-                const commentsList = document.getElementById("commentsList");
-                commentsList.innerHTML = "";
-                data.comments.forEach(comment => {
-                    const item = document.createElement("div");
-                    item.className = `comment-item ${comment.sentiment}`;
-                    item.innerText = comment.text;
-                    commentsList.appendChild(item);
-                });
-
-                resultsSection.style.display = "grid";
+                renderAnalysisResults(data);
+                loadHistory(); // Reload history sidebar to show newly added video
 
             } catch (err) {
                 alert(err.message);
@@ -379,6 +794,38 @@
                 loader.style.display = "none";
                 btnAnalyze.disabled = false;
             }
+        }
+
+        function renderAnalysisResults(data) {
+            const resultsSection = document.getElementById("resultsSection");
+            
+            // Set header title
+            document.getElementById("feedTitle").innerText = `Feed: ${data.video_title || 'Analyzed Comments'}`;
+
+            // Render percentages
+            document.getElementById("posPct").innerText = `${data.summary.positive.percentage}%`;
+            document.getElementById("neuPct").innerText = `${data.summary.neutral.percentage}%`;
+            document.getElementById("negPct").innerText = `${data.summary.negative.percentage}%`;
+
+            // Render Chart
+            updateChart(
+                data.summary.positive.count,
+                data.summary.neutral.count,
+                data.summary.negative.count
+            );
+
+            // Render Comments Feed
+            const commentsList = document.getElementById("commentsList");
+            commentsList.innerHTML = "";
+            
+            data.comments.forEach(comment => {
+                const item = document.createElement("div");
+                item.className = `comment-item ${comment.sentiment}`;
+                item.innerText = comment.text;
+                commentsList.appendChild(item);
+            });
+
+            resultsSection.style.display = "grid";
         }
 
         function updateChart(pos, neu, neg) {
@@ -403,13 +850,169 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        }
+                        legend: { display: false }
                     },
                     cutout: '75%'
                 }
             });
+        }
+
+        // --- System Monitoring Page Functions ---
+
+        async function loadMetrics() {
+            try {
+                const response = await fetch("/api/metrics");
+                const data = await response.json();
+                
+                document.getElementById("metricTotalReq").innerText = data.total_requests;
+                document.getElementById("metricQuota").innerText = `${data.quota_consumed} / 10,000`;
+                document.getElementById("metricAvgLatency").innerText = `${data.avg_latency.toFixed(2)}s`;
+                document.getElementById("metricSuccessRate").innerText = `${data.success_rate}%`;
+
+                // Update counts
+                const pos = data.global_sentiment.positive;
+                const neu = data.global_sentiment.neutral;
+                const neg = data.global_sentiment.negative;
+                
+                document.getElementById("globalPosCount").innerText = pos;
+                document.getElementById("globalNeuCount").innerText = neu;
+                document.getElementById("globalNegCount").innerText = neg;
+                
+                updateGlobalSentimentChart(pos, neu, neg);
+                
+                // Extract metrics labels/values for endpoint performance chart
+                const labels = data.endpoints.map(e => e.endpoint.replace('/api/', '/').replace('/analyze-video', '/analyze'));
+                const values = data.endpoints.map(e => e.avg_latency);
+                updateEndpointLatencyChart(labels, values);
+
+            } catch (err) {
+                console.error("Failed to load metrics logs:", err);
+            }
+        }
+
+        function updateGlobalSentimentChart(pos, neu, neg) {
+            const ctx = document.getElementById('globalSentimentChart').getContext('2d');
+            if (globalSentimentChart) {
+                globalSentimentChart.destroy();
+            }
+            
+            const hasData = (pos > 0 || neu > 0 || neg > 0);
+            const dataVals = hasData ? [pos, neu, neg] : [1, 1, 1];
+            const dataColors = hasData ? ['#10b981', '#6b7280', '#ef4444'] : ['#1f2937', '#1f2937', '#1f2937'];
+            
+            globalSentimentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Neutral', 'Negative'],
+                    datasets: [{
+                        data: dataVals,
+                        backgroundColor: dataColors,
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '72%'
+                }
+            });
+        }
+
+        function updateEndpointLatencyChart(labels, values) {
+            const ctx = document.getElementById('endpointLatencyChart').getContext('2d');
+            if (endpointLatencyChart) {
+                endpointLatencyChart.destroy();
+            }
+
+            endpointLatencyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Average Latency (s)',
+                        data: values,
+                        backgroundColor: 'rgba(99, 102, 241, 0.55)',
+                        borderColor: '#6366f1',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadModelInfo() {
+            try {
+                const response = await fetch("/api/model-info");
+                const data = await response.json();
+                
+                document.getElementById("modelName").innerText = data.model_name || "N/A";
+                document.getElementById("modelVocab").innerText = data.vocab_size ? `${data.vocab_size} tokens` : "N/A";
+                document.getElementById("modelC").innerText = data.hyperparameters.C !== undefined ? data.hyperparameters.C : "N/A";
+                document.getElementById("modelWeights").innerText = data.hyperparameters.class_weight || "N/A";
+            } catch (err) {
+                console.error("Failed to retrieve active model parameters:", err);
+            }
+        }
+
+        async function clearCacheAndMetrics() {
+            if (!confirm("Are you sure you want to delete all cached analyses and metrics logs? This action is irreversible.")) {
+                return;
+            }
+            
+            const password = prompt("Enter Admin Password:");
+            if (password === null) {
+                return; // User cancelled
+            }
+            if (!password.trim()) {
+                alert("Password cannot be empty.");
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/clear-cache", { 
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || "Failed to reset database.");
+                }
+
+                alert(data.message);
+                
+                // Reset views
+                document.getElementById("resultsSection").style.display = "none";
+                document.getElementById("videoUrl").value = "";
+                
+                loadHistory();
+                loadMetrics();
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
         }
     </script>
 </body>
